@@ -1,6 +1,6 @@
 ![Okada solution](http://www.mathworks.fr/matlabcentral/fileexchange/screenshots/8068/original.jpg)
 
-Okada solution (1985)
+Matlab scripts for the Okada solution
 ======
 
 This script computates the static co-seismic displacements due to a dislocation-type deformation in a half-space
