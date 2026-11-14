@@ -76,16 +76,24 @@ w = -U*(cos(theta)*...
     u2w (X1,P1-W,Y1,d,delta,lambda,mu) -...
     u2w (X1-L,P1,Y1,d,delta,lambda,mu)))/(2*pi);
 
+% For a vertical fault (cos(delta) = 0) the functions I1 to I5 take the limiting forms
+% given by the expressions of Okada (1992), Table 6, for cos(delta) = 0; they are used as
+% soon as |cos(delta)| < 1e-5, below which the general forms lose their accuracy to rounding.
+
 function res = u1u (xi, eta, y, d, delta, lambda, mu)
     q = y*sin(delta) - d*cos(delta);
     dbar = eta*sin(delta) - q*cos(delta);
     X = sqrt (xi.^2 + q.^2);
     R = sqrt (xi.^2 + eta.^2 + q.^2);
-    I5 = 2*mu/((lambda+mu)*cos(delta))*...
-        atan ((eta.*(X+q*cos(delta))+...
-        X.*(R+X)*sin(delta))./(xi.*(R+X)*cos(delta)));
-    I1 = -mu/(lambda+mu)*xi./((R + dbar)*cos(delta)) -...
-        tan(delta)*I5;
+    if abs (cos(delta)) > 1e-5
+        I5 = 2*mu/((lambda+mu)*cos(delta))*...
+            atan ((eta.*(X+q*cos(delta))+...
+            X.*(R+X)*sin(delta))./(xi.*(R+X)*cos(delta)));
+        I1 = -mu/(lambda+mu)*xi./((R + dbar)*cos(delta)) -...
+            tan(delta)*I5;
+    else
+        I1 = -mu/(2*(lambda+mu))*xi.*q./(R + dbar).^2;
+    end
     res = xi.*q./(R.*(R+eta)) + atan(xi.*eta./(q.*R)) + I1*sin(delta);
 
 function res = u2u (xi, eta, y, d, delta, lambda, mu)
@@ -93,10 +101,15 @@ function res = u2u (xi, eta, y, d, delta, lambda, mu)
     R = sqrt (xi.^2 + eta.^2 + q.^2);
     dbar = eta*sin(delta) - q*cos(delta);
     ybar = eta*cos(delta) + q*sin(delta);
-    I4 = mu/((lambda+mu)*cos(delta))*(log(R+dbar) -...
-        sin(delta)*log(R+eta));
-    I3 = mu/(lambda+mu)*(ybar./(cos(delta)*(R + dbar)) -...
-        log(R + eta)) + tan(delta)*I4;
+    if abs (cos(delta)) > 1e-5
+        I4 = mu/((lambda+mu)*cos(delta))*(log(R+dbar) -...
+            sin(delta)*log(R+eta));
+        I3 = mu/(lambda+mu)*(ybar./(cos(delta)*(R + dbar)) -...
+            log(R + eta)) + tan(delta)*I4;
+    else
+        I3 = mu/(2*(lambda+mu))*(eta./(R + dbar) +...
+            ybar.*q./(R + dbar).^2 - log(R + eta));
+    end
     res = q./R - sin(delta)*cos(delta)*I3;
 
 function res = u1v (xi, eta, y, d, delta, lambda, mu)
@@ -104,10 +117,15 @@ function res = u1v (xi, eta, y, d, delta, lambda, mu)
     R = sqrt (xi.^2 + eta.^2 + q.^2);
     dbar = eta*sin(delta) - q*cos(delta);
     ybar = eta*cos(delta) + q*sin(delta);
-    I4 = mu/((lambda+mu)*cos(delta))*(log(R+dbar) -...
-        sin(delta)*log(R+eta));
-    I3 = mu/(lambda+mu)*(ybar./(cos(delta)*(R + dbar)) -...
-        log(R + eta)) + tan(delta)*I4;
+    if abs (cos(delta)) > 1e-5
+        I4 = mu/((lambda+mu)*cos(delta))*(log(R+dbar) -...
+            sin(delta)*log(R+eta));
+        I3 = mu/(lambda+mu)*(ybar./(cos(delta)*(R + dbar)) -...
+            log(R + eta)) + tan(delta)*I4;
+    else
+        I3 = mu/(2*(lambda+mu))*(eta./(R + dbar) +...
+            ybar.*q./(R + dbar).^2 - log(R + eta));
+    end
     I2 = -mu/(lambda+mu)*log(R+eta) - I3;
     res = ybar.*q./(R.*(R+eta)) + cos(delta)*q./(R+eta) + sin(delta)*I2;
 
@@ -117,11 +135,15 @@ function res = u2v (xi, eta, y, d, delta, lambda, mu)
     ybar = eta*cos(delta) + q*sin(delta);
     X = sqrt (xi.^2 + q.^2);
     R = sqrt (xi.^2 + eta.^2 + q.^2);
-    I5 = 2*mu/((lambda+mu)*cos(delta))*...
-        atan ((eta.*(X+q*cos(delta))+...
-        X.*(R+X)*sin(delta))./(xi.*(R+X)*cos(delta)));
-    I1 = -mu/(lambda+mu)*xi./((R + dbar)*cos(delta)) -...
-        tan(delta)*I5;
+    if abs (cos(delta)) > 1e-5
+        I5 = 2*mu/((lambda+mu)*cos(delta))*...
+            atan ((eta.*(X+q*cos(delta))+...
+            X.*(R+X)*sin(delta))./(xi.*(R+X)*cos(delta)));
+        I1 = -mu/(lambda+mu)*xi./((R + dbar)*cos(delta)) -...
+            tan(delta)*I5;
+    else
+        I1 = -mu/(2*(lambda+mu))*xi.*q./(R + dbar).^2;
+    end
     res = ybar.*q./(R.*(R+xi)) + cos(delta)*atan(xi.*eta./(q.*R)) -...
         sin(delta)*cos(delta)*I1;
 
@@ -130,8 +152,12 @@ function res = u1w (xi, eta, y, d, delta, lambda, mu)
     eta = eta + eps;
     R = sqrt (xi.^2 + eta.^2 + q.^2);
     dbar = eta*sin(delta) - q*cos(delta);
-    I4 = mu/((lambda+mu)*cos(delta))*(log(R+dbar) -...
-        sin(delta)*log(R+eta));
+    if abs (cos(delta)) > 1e-5
+        I4 = mu/((lambda+mu)*cos(delta))*(log(R+dbar) -...
+            sin(delta)*log(R+eta));
+    else
+        I4 = -mu/(lambda+mu)*q./(R + dbar);
+    end
     res = dbar.*q./(R.*(R+eta)) + q*sin(delta)./(R+eta) +...
         I4*sin(delta);
     
@@ -140,9 +166,13 @@ function res = u2w (xi, eta, y, d, delta, lambda, mu)
     X = sqrt (xi.^2 + q.^2);
     R = sqrt (X.^2 + eta.^2);
     dbar = eta*sin(delta) - q*cos(delta);
-    I5 = 2*mu/((lambda+mu)*cos(delta))*...
-        atan ((eta.*(X+q*cos(delta))+...
-        X.*(R+X)*sin(delta))./(xi.*(R+X)*cos(delta)));
+    if abs (cos(delta)) > 1e-5
+        I5 = 2*mu/((lambda+mu)*cos(delta))*...
+            atan ((eta.*(X+q*cos(delta))+...
+            X.*(R+X)*sin(delta))./(xi.*(R+X)*cos(delta)));
+    else
+        I5 = -mu/(lambda+mu)*xi*sin(delta)./(R + dbar);
+    end
     res = dbar.*q./(R.*(R+xi)) +...
         sin(delta)*atan(xi.*eta./(q.*R)) -...
         I5*sin(delta)*cos(delta);
