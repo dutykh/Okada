@@ -77,8 +77,9 @@ w = -U*(cos(theta)*...
     u2w (X1-L,P1,Y1,d,delta,lambda,mu)))/(2*pi);
 
 % For a vertical fault (cos(delta) = 0) the functions I1 to I5 take the limiting forms
-% given by the expressions of Okada (1992), Table 6, for cos(delta) = 0; they are used as
-% soon as |cos(delta)| < 1e-5, below which the general forms lose their accuracy to rounding.
+% of Okada (1985), equation (29), the same as those of Okada (1992), Table 6, for
+% cos(delta) = 0; they are used as soon as |cos(delta)| < 1e-5, below which the general
+% forms of equation (28) lose their accuracy to rounding.
 
 function res = u1u (xi, eta, y, d, delta, lambda, mu)
     q = y*sin(delta) - d*cos(delta);
